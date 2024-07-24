@@ -11,13 +11,12 @@ import utils
 import argparse
 import data_loader
 
-from . import rits
+import rits_i
 from sklearn import metrics
 
 from ipdb import set_trace
 
-SEQ_LEN = 48
-RNN_HID_SIZE = 64
+SEQ_LEN = 36
 
 
 class Model(nn.Module):
@@ -31,8 +30,8 @@ class Model(nn.Module):
         self.build()
 
     def build(self):
-        self.rits_f = rits.Model(self.rnn_hid_size, self.impute_weight, self.label_weight)
-        self.rits_b = rits.Model(self.rnn_hid_size, self.impute_weight, self.label_weight)
+        self.rits_f = rits_i.Model(self.rnn_hid_size, self.impute_weight, self.label_weight)
+        self.rits_b = rits_i.Model(self.rnn_hid_size, self.impute_weight, self.label_weight)
 
     def forward(self, data):
         ret_f = self.rits_f(data, 'forward')
@@ -66,7 +65,7 @@ class Model(nn.Module):
         def reverse_tensor(tensor_):
             if tensor_.dim() <= 1:
                 return tensor_
-            indices = list(range(tensor_.size()[1]))[::-1]
+            indices = range(tensor_.size()[1])[::-1]
             indices = Variable(torch.LongTensor(indices), requires_grad = False)
 
             if torch.cuda.is_available():

@@ -10,8 +10,8 @@ data = np.nan_to_num(impute)
 
 n_train = 3000
 
-print((impute.shape))
-print((label.shape))
+print(impute.shape)
+print(label.shape)
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score
@@ -24,4 +24,4 @@ for i in range(10):
 
     auc.append(roc_auc_score(label[n_train:].reshape(-1,), pred[:, 1].reshape(-1, )))
 
-print((np.mean(auc)))
+print(np.mean(auc))

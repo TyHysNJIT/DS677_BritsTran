@@ -11,7 +11,7 @@ import utils
 import argparse
 import data_loader
 
-from . import rits
+import rits
 from sklearn import metrics
 
 from ipdb import set_trace
@@ -66,7 +66,7 @@ class Model(nn.Module):
         def reverse_tensor(tensor_):
             if tensor_.dim() <= 1:
                 return tensor_
-            indices = list(range(tensor_.size()[1]))[::-1]
+            indices = range(tensor_.size()[1])[::-1]
             indices = Variable(torch.LongTensor(indices), requires_grad = False)
 
             if torch.cuda.is_available():

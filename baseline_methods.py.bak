@@ -43,7 +43,7 @@ def get_loss(X, X_pred, Y):
 
 X_mean = []
 
-print((len(X)))
+print(len(X))
 
 for x, y in zip(X, Y):
     X_mean.append(fancyimpute.SimpleFill().complete(x))
@@ -54,11 +54,11 @@ Z_c = np.array(Z)
 X_mean = np.concatenate(X_mean, axis=0).reshape(-1, 48, 35)
 
 print('Mean imputation:')
-print((get_loss(X_c, X_mean, Y_c)))
+print(get_loss(X_c, X_mean, Y_c))
 
 # save mean inputation results
-print((X_c.shape, Y_c.shape, Z_c.shape))
-input()
+print(X_c.shape, Y_c.shape, Z_c.shape)
+raw_input()
 np.save('./result/mean_data.npy', X_mean)
 np.save('./result/mean_label.npy', Z_c)
 
@@ -74,9 +74,9 @@ Y_c = np.concatenate(Y, axis=0)
 X_knn = np.concatenate(X_knn, axis=0)
 
 print('KNN imputation')
-print((get_loss(X_c, X_knn, Y_c)))
+print(get_loss(X_c, X_knn, Y_c))
 
-input()
+raw_input()
 
 
 # ### Matrix Factorization
@@ -93,7 +93,7 @@ for i, (x, y) in enumerate(zip(X, Y)):
         X_mf_c = np.concatenate(X_mf, axis=0)
 
         print('MF imputation')
-        print((get_loss(X_c, X_mf_c, Y_c)))
+        print(get_loss(X_c, X_mf_c, Y_c))
 
 
 # MICE imputation
@@ -108,7 +108,7 @@ batch_size = 128
 nb_batch = (n + batch_size - 1) // batch_size
 
 for i in range(nb_batch):
-    print(('On batch {}'.format(i)))
+    print('On batch {}'.format(i))
     x = np.concatenate(X[i * batch_size: (i + 1) * batch_size])
     y = np.concatenate(Y[i * batch_size: (i + 1) * batch_size])
     x_mice = fancyimpute.MICE(n_imputations=100, n_pmm_neighbors=20, verbose=False).complete(x)
@@ -120,4 +120,4 @@ X_c = np.concatenate(X, axis=0)
 Y_c = np.concatenate(Y, axis=0)
 
 print('MICE imputation')
-print((get_loss(X_c, X_mice, Y_c)))
+print(get_loss(X_c, X_mice, Y_c))
