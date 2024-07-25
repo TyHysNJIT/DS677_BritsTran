@@ -32,14 +32,21 @@ class Model(nn.Module):
     def __init__(self, rnn_hid_size, impute_weight, label_weight, num_heads=8, num_layers=6, hidden_dim=256):
         super(Model, self).__init__()
 
-        self.rnn_hid_size = rnn_hid_size
+        self.num_heads = num_heads
+        self.rnn_hid_size = self.adjust_rnn_hid_size(rnn_hid_size, num_heads)
         self.impute_weight = impute_weight
         self.label_weight = label_weight
-        self.num_heads = num_heads
         self.num_layers = num_layers
         self.hidden_dim = hidden_dim
 
         self.build()
+
+    def adjust_rnn_hid_size(self, rnn_hid_size, num_heads):
+        # Adjust rnn_hid_size to be divisible by num_heads
+        if rnn_hid_size % num_heads != 0:
+            rnn_hid_size = ((rnn_hid_size // num_heads) + 1) * num_heads
+            print(f"Adjusted rnn_hid_size to {rnn_hid_size} to be divisible by num_heads ({num_heads})")
+        return rnn_hid_size
 
     def build(self):
         self.rits_f = rits.Model(self.rnn_hid_size, self.impute_weight, self.label_weight)
