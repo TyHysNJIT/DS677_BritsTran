@@ -19,24 +19,40 @@ from ipdb import set_trace
 SEQ_LEN = 48
 RNN_HID_SIZE = 64
 
+class TransformerBlock(nn.Module):
+    def __init__(self, input_size, num_heads, num_layers, hidden_dim):
+        super(TransformerBlock, self).__init__()
+        self.encoder_layer = nn.TransformerEncoderLayer(d_model=input_size, nhead=num_heads, dim_feedforward=hidden_dim)
+        self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=num_layers)
+
+    def forward(self, src):
+        return self.transformer_encoder(src)
 
 class Model(nn.Module):
-    def __init__(self, rnn_hid_size, impute_weight, label_weight):
+    def __init__(self, rnn_hid_size, impute_weight, label_weight, num_heads=8, num_layers=6, hidden_dim=256):
         super(Model, self).__init__()
 
         self.rnn_hid_size = rnn_hid_size
         self.impute_weight = impute_weight
         self.label_weight = label_weight
+        self.num_heads = num_heads
+        self.num_layers = num_layers
+        self.hidden_dim = hidden_dim
 
         self.build()
 
     def build(self):
         self.rits_f = rits.Model(self.rnn_hid_size, self.impute_weight, self.label_weight)
         self.rits_b = rits.Model(self.rnn_hid_size, self.impute_weight, self.label_weight)
+        self.transformer_block = TransformerBlock(input_size=self.rnn_hid_size, num_heads=self.num_heads, num_layers=self.num_layers, hidden_dim=self.hidden_dim)
 
     def forward(self, data):
         ret_f = self.rits_f(data, 'forward')
         ret_b = self.reverse(self.rits_b(data, 'backward'))
+
+        # Apply transformer block to the imputations
+        ret_f['imputations'] = self.transformer_block(ret_f['imputations'].permute(1, 0, 2)).permute(1, 0, 2)
+        ret_b['imputations'] = self.transformer_block(ret_b['imputations'].permute(1, 0, 2)).permute(1, 0, 2)
 
         ret = self.merge_ret(ret_f, ret_b)
 
@@ -67,7 +83,7 @@ class Model(nn.Module):
             if tensor_.dim() <= 1:
                 return tensor_
             indices = list(range(tensor_.size()[1]))[::-1]
-            indices = Variable(torch.LongTensor(indices), requires_grad = False)
+            indices = Variable(torch.LongTensor(indices), requires_grad=False)
 
             if torch.cuda.is_available():
                 indices = indices.cuda()
@@ -88,4 +104,3 @@ class Model(nn.Module):
             optimizer.step()
 
         return ret
-
