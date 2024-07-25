@@ -57,6 +57,10 @@ class Model(nn.Module):
         ret_f = self.rits_f(data, 'forward')
         ret_b = self.reverse(self.rits_b(data, 'backward'))
 
+        # Ensure imputations have the correct shape
+        print(f"ret_f imputations shape before transformer: {ret_f['imputations'].shape}")
+        print(f"ret_b imputations shape before transformer: {ret_b['imputations'].shape}")
+
         # Apply transformer block to the imputations
         ret_f['imputations'] = self.transformer_block(ret_f['imputations'].permute(1, 0, 2)).permute(1, 0, 2)
         ret_b['imputations'] = self.transformer_block(ret_b['imputations'].permute(1, 0, 2)).permute(1, 0, 2)
